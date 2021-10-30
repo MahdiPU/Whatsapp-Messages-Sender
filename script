@@ -1,0 +1,147 @@
+#Code By Bigdaddy
+import xlrd
+import time
+import datetime
+import os
+import pathlib
+from urllib.parse import quote
+from typing import Union, Optional
+from platform import system 
+import webbrowser as web
+import pyautogui as pg
+import wikipedia
+import requests
+from ipywidgets import Button
+from IPython.display import clear_output, display
+from tkinter import *
+from tkinter import Tk, filedialog
+import keyboard
+
+
+##### FUNCTION TO CLOSE TAB AFTER SENDING MSG ######
+def close_tab(wait_time: int = 2) -> None:
+    """Closes the Currently Opened Browser Tab"""
+
+    if system().lower() in ("windows", "linux"):
+        pg.hotkey("alt", "tab")
+        time.sleep(.5)
+        pg.hotkey("ctrl", "w")
+    elif system().lower() in "darwin":
+        pg.hotkey("command", "w")
+    else:
+        raise Warning(f"{system().lower()} not supported!")
+    
+    
+
+##### SENDING THE MESSAGE ####
+def sendwhatmsg_instantly(phone_no: str, message: str, wait_time: int,
+                          tab_close: bool, close_time: int):
+    """Send WhatsApp Message Instantly"""
+
+    parsed_message = quote(message) 
+    url = 'https://api.whatsapp.com/send/?phone='+phone_no+'&text=' + message
+    web.open(url)
+    time.sleep(wait_time)
+    pg.press('enter')
+    if tab_close:
+        close_tab(wait_time=1)
+
+        
+
+#### OPENING THE EXCEL FILE ####
+def file_opener():
+    global input
+    input = filedialog.askopenfilename(initialdir="/")
+    print(input)
+    base.destroy()
+    
+
+#### MAIN ####
+input = "h"
+c = 0
+import tkinter as tk
+base = Tk()
+# base.configure(bg='#25D366')
+base.geometry('600x200')
+
+fromD_var=tk.StringVar()
+toD_var=tk.StringVar()
+date_var=tk.StringVar()
+station_var=tk.StringVar()
+
+
+l = Label(base, text = "Station")
+l.config(font =("Courier", 14))
+l.place(x=30, y=20)
+
+l2 = Label(base, text = "From")
+l2.config(font =("Courier", 14))
+l2.place(x=180, y=20)
+
+
+l3 = Label(base, text = "To")
+l3.config(font =("Courier", 14))
+l3.place(x=330, y=20)
+
+
+l4 = Label(base, text = "Date")
+l4.config(font =("Courier", 14))
+l4.place(x=480, y=20)
+
+station = tk.Entry(base,textvariable = station_var, font=('calibre',10,'normal'))
+station.place(x=30, y=50)
+
+fromD = tk.Entry(base,textvariable = fromD_var, font=('calibre',10,'normal'))
+fromD.place(x=180, y=50)
+ 
+
+toD = tk.Entry(base,textvariable = toD_var, font=('calibre',10,'normal'))
+toD.place(x=330, y=50)
+
+
+date = tk.Entry(base,textvariable = date_var, font=('calibre',10,'normal'))
+date.place(x=480, y=50)
+
+m = Button(base, text ='                        Select a .txt/.csv file  and send message                       ', command = lambda:file_opener())
+m.place(x=30, y=100)
+
+mainloop()
+
+# Give the location of the file
+loc = (input)
+ 
+# To open Workbook
+wb = xlrd.open_workbook(loc)
+sheet = wb.sheet_by_index(0)
+ 
+# For row 0 and column 0
+rowsnb = sheet.nrows
+
+
+
+
+first_time = datetime.datetime.now()
+
+for row in range(rowsnb):
+    if keyboard.is_pressed('esc'):
+        sys.exit()
+        
+    phone = int(sheet.cell_value(row, 0))
+    phone = str(phone)
+    phone.lstrip('0')
+    typ = sheet.cell_value(row, 1)
+    plate =str(sheet.cell_value(row, 2))
+    serial = int(sheet.cell_value(row,4))
+    text = " صاحب السيارة نوع "+typ+" رقم "+plate+"، يرجى التوجه الى محطة "+station_var.get()+" بتاريخ "+date_var.get()+" من الساعة "+fromD_var.get()+" الى الساعة "+toD_var.get()+" وإبراز الرقم: "+str(serial)+" عند الوصول. الرجاء الالتزام بالوقت المحدد"
+    code = "961"
+    if len(str(phone)) > 8:
+        code = ""
+        
+    print(text)
+    sendwhatmsg_instantly(code+str(phone), text, 3, True, .5)
+    print(phone)
+    later_time = datetime.datetime.now()
+    
+difference = later_time - first_time
+print(difference)
+#By Bigdaddy
